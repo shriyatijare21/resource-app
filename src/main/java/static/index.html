@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Study Resource Sharing</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 500px;
+            margin-top: 40px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        h3 {
+            margin-top: 20px;
+            color: #444;
+        }
+
+        input {
+            width: 95%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 10px;
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background: #f9f9f9;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .small-text {
+            font-size: 12px;
+            color: gray;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Study Resource Sharing</h2>
+
+    <h3>Add Resource</h3>
+
+    <input type="text" id="title" placeholder="Title">
+    <input type="text" id="description" placeholder="Description">
+    <input type="text" id="link" placeholder="Link">
+    <input type="text" id="subject" placeholder="Subject">
+
+    <button onclick="addResource()">Add Resource</button>
+
+    <h3>All Resources</h3>
+    <button onclick="getResources()">Load Resources</button>
+
+    <ul id="list"></ul>
+
+</div>
+
+<script>
+function addResource() {
+    fetch("http://localhost:8080/resources", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            title: document.getElementById("title").value,
+            description: document.getElementById("description").value,
+            link: document.getElementById("link").value,
+            subject: document.getElementById("subject").value
+        })
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert("Resource Added!");
+        getResources();
+    });
+}
+
+function getResources() {
+    fetch("http://localhost:8080/resources")
+    .then(res => res.json())
+    .then(data => {
+        let list = document.getElementById("list");
+        list.innerHTML = "";
+
+        data.forEach(r => {
+            let item = document.createElement("li");
+            item.innerHTML =
+                "<b>" + r.title + "</b><br>" +
+                r.subject + "<br>" +
+                "<span class='small-text'>" + r.description + "</span>";
+            list.appendChild(item);
+        });
+    });
+}
+</script>
+
+</body>
+</html>
