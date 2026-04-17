@@ -173,26 +173,39 @@ function getResources() {
         let list = document.getElementById("list");
         list.innerHTML = "";
 
-        data.forEach(r => {
-            let item = document.createElement("li");
+		data.forEach(r => {
+		    let item = document.createElement("li");
 
-            item.innerHTML =
-                "<b>" + r.title + "</b>" +
-                "<span class='small-text'>" + r.subject + "</span>" +
-                "<span class='small-text'>" + r.description + "</span>";
+		    item.innerHTML =
+		        "<b>" + r.title + "</b>" +
+		        "<span class='small-text'>" + r.subject + "</span>" +
+		        "<span class='small-text'>" + r.description + "</span>";
 
-            if (r.link) {
-                item.innerHTML +=
-                    "<br><a class='link' href='" + r.link + "' target='_blank'>Open Resource</a>";
-            } else {
-                item.innerHTML += "<br><span class='small-text'>No link provided</span>";
-            }
+		    // Link
+		    if (r.link) {
+		        item.innerHTML +=
+		            "<br><a class='link' href='" + r.link + "' target='_blank'>Open Resource</a>";
+		    }
 
-            list.appendChild(item);
-        });
+		    // ✅ DELETE BUTTON
+		    item.innerHTML +=
+		        "<br><button onclick='deleteResource(" + r.id + ")' style='background:red;margin-top:8px;'>Delete</button>";
+
+		    list.appendChild(item);
+		});
+		
     })
     .catch(() => {
         showError("Failed to load resources from server");
+    });
+}
+function deleteResource(id) {
+    fetch("/resources/" + id, {
+        method: "DELETE"
+    })
+    .then(() => {
+        alert("Deleted successfully!");
+        getResources(); // refresh list
     });
 }
 
