@@ -62,15 +62,30 @@
 
         li {
             background: #f9f9f9;
-            margin: 8px 0;
-            padding: 10px;
-            border-radius: 8px;
-            border-left: 4px solid #4CAF50;
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 5px solid #4CAF50;
         }
 
         .small-text {
             font-size: 12px;
             color: gray;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .link {
+            display: inline-block;
+            margin-top: 6px;
+            color: #1a73e8;
+            text-decoration: none;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -85,7 +100,7 @@
 
     <input type="text" id="title" placeholder="Title">
     <input type="text" id="description" placeholder="Description">
-    <input type="text" id="link" placeholder="Link">
+    <input type="text" id="link" placeholder="Link (https://...)">
     <input type="text" id="subject" placeholder="Subject">
 
     <button onclick="addResource()">Add Resource</button>
@@ -98,23 +113,56 @@
 </div>
 
 <script>
+
+function showError(msg) {
+    alert(" " + msg);
+}
+
+function showSuccess(msg) {
+    alert(" " + msg);
+}
+
+// ✅ VALIDATION BEFORE SENDING REQUEST
 function addResource() {
+
+    let title = document.getElementById("title").value.trim();
+    let description = document.getElementById("description").value.trim();
+    let link = document.getElementById("link").value.trim();
+    let subject = document.getElementById("subject").value.trim();
+
+    // ✅ Frontend validation
+    if (!title || !description || !link || !subject) {
+        alert("All fields are required!");
+        return;
+    }
+
+    if (!link.startsWith("http")) {
+        alert("Link must start with http or https");
+        return;
+    }
+
     fetch("http://localhost:8080/resources", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-            title: document.getElementById("title").value,
-            description: document.getElementById("description").value,
-            link: document.getElementById("link").value,
-            subject: document.getElementById("subject").value
-        })
+        body: JSON.stringify({ title, description, link, subject })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            return res.json().then(err => {
+                throw err;
+            });
+        }
+        return res.json();
+    })
     .then(() => {
-        alert("Resource Added!");
+        alert("Resource Added Successfully!");
         getResources();
+    })
+    .catch(err => {
+        console.log(err);
+        alert("Error: " + JSON.stringify(err));
     });
 }
 
@@ -127,15 +175,27 @@ function getResources() {
 
         data.forEach(r => {
             let item = document.createElement("li");
+
             item.innerHTML =
-                "<b>" + r.title + "</b><br>" +
-                r.subject + "<br>" +
+                "<b>" + r.title + "</b>" +
+                "<span class='small-text'>" + r.subject + "</span>" +
                 "<span class='small-text'>" + r.description + "</span>";
+
+            if (r.link) {
+                item.innerHTML +=
+                    "<br><a class='link' href='" + r.link + "' target='_blank'>Open Resource</a>";
+            } else {
+                item.innerHTML += "<br><span class='small-text'>No link provided</span>";
+            }
+
             list.appendChild(item);
         });
+    })
+    .catch(() => {
+        showError("Failed to load resources from server");
     });
 }
-</script>
 
+</script>
 </body>
 </html>
