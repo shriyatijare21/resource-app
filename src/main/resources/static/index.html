@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title> Resource Sharing</title>
+    <!-- Title shown in browser tab -->
+    <title> Study Resource Sharing</title>
 
     <style>
+        /* Page styling */
         body {
             font-family: Arial, sans-serif;
             background-color: #f2f4f8;
@@ -13,6 +15,7 @@
             justify-content: center;
         }
 
+        /* Main container */
         .container {
             width: 500px;
             margin-top: 40px;
@@ -22,39 +25,34 @@
             box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
         }
 
+        /* Headings */
         h2 {
             text-align: center;
-            color: #333;
         }
 
         h3 {
             margin-top: 20px;
-            color: #444;
         }
 
+        /* Input fields */
         input {
             width: 95%;
             padding: 8px;
             margin: 5px 0;
-            border: 1px solid #ccc;
-            border-radius: 6px;
         }
 
+        /* Buttons */
         button {
             padding: 10px;
             width: 100%;
-            background-color: #4CAF50;
+            background-color: green;
             color: white;
             border: none;
-            border-radius: 6px;
-            cursor: pointer;
             margin-top: 10px;
+            cursor: pointer;
         }
 
-        button:hover {
-            background-color: #45a049;
-        }
-
+        /* Resource list */
         ul {
             list-style-type: none;
             padding: 0;
@@ -64,28 +62,6 @@
             background: #f9f9f9;
             margin: 10px 0;
             padding: 12px;
-            border-radius: 10px;
-            border-left: 5px solid #4CAF50;
-        }
-
-        .small-text {
-            font-size: 12px;
-            color: gray;
-            display: block;
-            margin-top: 5px;
-        }
-
-        .link {
-            display: inline-block;
-            margin-top: 6px;
-            color: #1a73e8;
-            text-decoration: none;
-            font-size: 14px;
-            word-break: break-all;
-        }
-
-        .link:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
@@ -94,118 +70,154 @@
 
 <div class="container">
 
-    <h2> Resource Sharing</h2>
+    <!-- App Title -->
+    <h2> Study Resource Sharing</h2>
 
+    <!-- Add Resource Form -->
     <h3>Add Resource</h3>
 
+    <!-- Input fields -->
     <input type="text" id="title" placeholder="Title">
     <input type="text" id="description" placeholder="Description">
     <input type="text" id="link" placeholder="Link (https://...)">
     <input type="text" id="subject" placeholder="Subject">
 
+    <!-- Button to add resource -->
     <button onclick="addResource()">Add Resource</button>
 
+    <!-- Section to display resources -->
     <h3>All Resources</h3>
+
+    <!-- Button to load data -->
     <button onclick="getResources()">Load Resources</button>
 
+    <!-- List where data will be shown -->
     <ul id="list"></ul>
 
 </div>
 
 <script>
 
+// Show error message
 function showError(msg) {
-    alert(" " + msg);
+    alert(msg);
 }
 
+// Show success message
 function showSuccess(msg) {
-    alert(" " + msg);
+    alert(msg);
 }
 
-// ✅ VALIDATION BEFORE SENDING REQUEST
+//  ADD RESOURCE FUNCTION
 function addResource() {
 
+    // Get values from input fields
     let title = document.getElementById("title").value.trim();
     let description = document.getElementById("description").value.trim();
     let link = document.getElementById("link").value.trim();
     let subject = document.getElementById("subject").value.trim();
 
-    // ✅ Frontend validation
+    //  Frontend validation
     if (!title || !description || !link || !subject) {
         alert("All fields are required!");
         return;
     }
 
+    // Check link format
     if (!link.startsWith("http")) {
         alert("Link must start with http or https");
         return;
     }
 
+    // Send POST request to backend
     fetch("/resources", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
+        // Convert data to JSON
         body: JSON.stringify({ title, description, link, subject })
     })
+
+    // Handle response
     .then(res => {
         if (!res.ok) {
+            // If error → show backend error
             return res.json().then(err => {
                 throw err;
             });
         }
         return res.json();
     })
+
+    // On success
     .then(() => {
         alert("Resource Added Successfully!");
-        getResources();
+        getResources(); // reload list
     })
+
+    // On error
     .catch(err => {
-        console.log(err);
         alert("Error: " + JSON.stringify(err));
     });
 }
 
+
+//  GET ALL RESOURCES
 function getResources() {
+
     fetch("/resources")
     .then(res => res.json())
+
     .then(data => {
+
         let list = document.getElementById("list");
+
+        // Clear old list
         list.innerHTML = "";
 
-		data.forEach(r => {
-		    let item = document.createElement("li");
+        // Loop through all resources
+        data.forEach(r => {
 
-		    item.innerHTML =
-		        "<b>" + r.title + "</b>" +
-		        "<span class='small-text'>" + r.subject + "</span>" +
-		        "<span class='small-text'>" + r.description + "</span>";
+            let item = document.createElement("li");
 
-		    // Link
-		    if (r.link) {
-		        item.innerHTML +=
-		            "<br><a class='link' href='" + r.link + "' target='_blank'>Open Resource</a>";
-		    }
+            // Add title, subject, description
+            item.innerHTML =
+                "<b>" + r.title + "</b>" +
+                "<br>" + r.subject +
+                "<br>" + r.description;
 
-		    // ✅ DELETE BUTTON
-		    item.innerHTML +=
-		        "<br><button onclick='deleteResource(" + r.id + ")' style='background:red;margin-top:8px;'>Delete</button>";
+            // Add link
+            if (r.link) {
+                item.innerHTML +=
+                    "<br><a href='" + r.link + "' target='_blank'>Open Resource</a>";
+            }
 
-		    list.appendChild(item);
-		});
-		
+            // Add delete button
+            item.innerHTML +=
+                "<br><button onclick='deleteResource(" + r.id + ")'>Delete</button>";
+
+            // Add item to list
+            list.appendChild(item);
+        });
     })
+
     .catch(() => {
-        showError("Failed to load resources from server");
+        showError("Failed to load resources");
     });
 }
+
+
+// ❌ DELETE RESOURCE
 function deleteResource(id) {
+
     fetch("/resources/" + id, {
         method: "DELETE"
     })
+
     .then(() => {
         alert("Deleted successfully!");
-        getResources(); // refresh list
+        getResources(); // reload list
     });
 }
 
