@@ -19,7 +19,7 @@
     <properties>
         <java.version>17</java.version>
     </properties>
-
+StudentAppStudentAppStudentApp
     <dependencies>
 
         <!-- Web -->
@@ -41,7 +41,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- TESTING (VERY IMPORTANT) -->
+        <!-- TESTING  -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
